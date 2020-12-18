@@ -124,7 +124,7 @@ app.post('/main', upload.single('my-img'), (req, res) => {
 })
 
 //application/x-www.form-urlencoded
-app.post('/login', express.json(),
+app.post('/login', express.urlencoded({extended: true}),
     async (req, res) => {
 		try{
 			const username = req.body.username
