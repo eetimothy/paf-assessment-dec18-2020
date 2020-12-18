@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import {CameraService} from '../camera.service';
+import { CameraService } from '../camera.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http'
 
@@ -13,6 +13,7 @@ export class MainComponent implements OnInit {
 	form: FormGroup
 	imagePath = '/assets/cactus.png'
   	apiUrl = "http://localhost:3000";
+	  @ViewChild('upload') upload: ElementRef;
 
 	constructor(private cameraSvc: CameraService, private fb: FormBuilder, private http: HttpClient) { }
 
@@ -27,30 +28,13 @@ export class MainComponent implements OnInit {
 		imagefile: this.fb.control('', [Validators.required])
 	  })
 	}
-	share() {
-		console.info('form = ', this.form.value)
-		const value = this.form.value
-	
-		//fill in the form (x-www-form-urlencoded)
-		let params = new HttpParams()
-		params = params.set('title', value['title'])
-		params = params.set('comments', value['comments'])
-	
-		//set the HTTP header
-		let headers = new HttpHeaders()
-		headers = headers.set('Content-Type', 
-		'application/x-www-form-urlencoded')
-	
-		//make the POST request
-		this.http.post<any>('http://localhost:3000/main',
-		  params.toString(), { headers }) //must add toString()
-		  .toPromise()
-		  .then(res => {
-			console.info('Response: ', res)
-		  })
-		  .catch(err => {
-			console.error('ERROR: ', err)
-		  })
+	async share(): Promise <void> {
+		//handle upload
+		const data = new FormData()
+		//console.log(this.cameraSvc.getImage())
+		data.set('my-img', this.cameraSvc.getImage().imageData)
+		data.set('form', JSON.stringify(this.form.value))
+		await this.http.post<any>('http://localhost:3000/main', data).toPromise()
 	  }
 	
 	
