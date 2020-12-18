@@ -17,6 +17,7 @@ const PORT = parseInt(process.argv[2]) || parseInt(process.env.PORT) || 3000
 const app = express()
 app.use(morgan('combined'))
 app.use(cors())
+app.use(express.static(__dirname + '/frontend'))
 
 //configure the databases
 //MYSQL database setup
