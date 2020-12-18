@@ -8,7 +8,7 @@ const multer = require('multer')
 const mysql = require('mysql2/promise')
 const multerS3 = require('multer-s3')
 const fs = require('fs')
-
+const { mkQuery } = require('./db_utils')
 
 //configure PORT
 const PORT = parseInt(process.argv[2]) || parseInt(process.env.PORT) || 3000
@@ -87,14 +87,17 @@ const upload = multer({
 	dest: process.env.TMP_DIR || './uploads'
 })
 
+const checker = mkQuery(`SELECT * FROM user WHERE user_id = ? AND password = ?`, pool)
+
 app.post('/main', upload.single('my-img'), (req, res) => {
 	//insert image
-	console.info('>>> req.body: ', req.body)
-	console.info('>>> req.file: ', req.file)
+	console.log(req.body)
+	console.log(req.file)
+	
 
 	res.on('finish', () => {
 		// delete the temp file
-		fs.unlink(req.file.path, () => { })
+		fs.unlink(req.file.path,() => { })
 	})
 
 	const doc = submission(req.body, req.file.filename)
@@ -121,31 +124,31 @@ app.post('/main', upload.single('my-img'), (req, res) => {
 
 //application/x-www.form-urlencoded
 app.post('/login', express.urlencoded({ extended: true }),
-    (req, res) => {
+    async (req, res) => {
 		try{
-		console.info('>> payload: ', req.body)
+			const username = req.body.username
+			const password = req.body.password
 
-        res.status(200).type('application/json')
-		res.json({ message: 'accepted' })
+			if (username && password) {
+				const result = await checker([username, password])
+				console.log(result)
+
+				if(result[0].username == username && result[0].password == password ) {
+					res.status(200)
+					res.type('application/json')
+					res.json({message: 'ok'})
+				}
+			} else {
+				res.status(401)
+			}
+		console.info('>> payload: ', req.body)
 		
 		} catch(e) {
-			resp.status(500)
-        	resp.type('application/json')
-        	resp.json({ error: e })
+			res.status(500)
+        	res.type('application/json')
+        	res.json({ error: e })
 		}
     })
-
-app.post('/main', express.urlencoded({ entended: true }),
-	(req, res) => {
-		console.info('>> payload: ', req.body)
-
-		resp.status(200).type('application/json')
-		resp.json({ message: 'accepted' })
-	}
-)
-
-
-
 
 
 //start server only if both databases are connected
