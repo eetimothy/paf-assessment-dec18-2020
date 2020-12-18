@@ -42,15 +42,17 @@ export class LoginComponent implements OnInit {
       .toPromise()
       .then(res => {
         console.info('Response: ', res)
+        
       })
       .catch(err => {
         console.error('ERROR: ', err)
+        this.errorMessage = err.error.message
       })
   }
 
   //handle error
     notAuthenticated(){
-      
+
     }
   
 }

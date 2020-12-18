@@ -124,7 +124,7 @@ app.post('/main', upload.single('my-img'), (req, res) => {
 })
 
 //application/x-www.form-urlencoded
-app.post('/login', express.urlencoded({ extended: true }),
+app.post('/login', express.json(),
     async (req, res) => {
 		try{
 			const username = req.body.username
@@ -141,6 +141,7 @@ app.post('/login', express.urlencoded({ extended: true }),
 				}
 			} else {
 				res.status(401)
+				res.json({message: 'wrong username or password'})
 			}
 		console.info('>> payload: ', req.body)
 		
